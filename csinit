@@ -1,0 +1,38 @@
+#!/bin/bash
+
+
+# 사용 방법
+#
+# 1. dotnet-install.sh 파일과 csinit 파일을 guest 폴더에 놓는다.
+#    즉, 터미널을 켜고 ls 를 쳤을 때 두 파일이 바로 나와야 한다.
+# 2. 터미널에 bash csinit 을 친다.
+# 3. 
+
+
+while [ true ]; do
+
+    echo "Install Dotnet? (Y/N)"
+        read yorn
+    if [ ${yorn} = "y" ] || [ ${yorn} = "Y" ] ; then
+        bash dotnet-install.sh -c Current
+        break
+    elif [ ${yorn} = "n" ] || [ ${yorn} = "N" ]; then
+        echo "Goodbye"
+        break
+    fi
+
+done
+
+# source ~/.bashrc
+export PATH="$PATH:$HOME/.dotnet"
+bash
+
+exit 0
+
+
+# 참고문헌
+#
+# 전체적인 것들 https://docs.microsoft.com/ko-kr/dotnet/core/install/linux-scripted-manual
+# 간단한 bash https://wiseworld.tistory.com/51
+# bash shell script 작성 https://blog.naver.com/PostView.nhn?blogId=lunarispars&logNo=221491991449
+# if문 https://hand-over.tistory.com/32
