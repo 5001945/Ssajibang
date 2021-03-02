@@ -18,7 +18,8 @@ echo -e "{
 }" > ~/.config/Code/User/settings.json
 
 #code --install-extension ms-dotnettools.csharp
-code --install-extension ms-python.python
+#code --install-extension ms-python.python
+code --install-extension ms-vscode.cpptools
 code --install-extension ms-ceintl.vscode-language-pack-ko
 code
 exit 0
