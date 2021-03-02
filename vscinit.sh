@@ -3,8 +3,8 @@
 
 # 사용 방법
 #
-# 1. vscinit 파일을 최상위 폴더(guest-어쩌구저쩌구)에 놓는다.
-# 2. Ctrl+` 를 눌러 터미널을 열고, 터미널에 bash vscinit 을 친다.
+# 1. vscinit.sh 파일을 최상위 폴더(guest-어쩌구저쩌구)에 놓는다.
+# 2. Ctrl+` 를 눌러 터미널을 열고, 터미널에 bash vscinit.sh 을 친다.
 # 3. 새로운 창이 뜨면 기존 VSCode 창은 닫는다.
 
 echo -e "{
