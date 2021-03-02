@@ -5,7 +5,7 @@
 #
 # 1. pyinit 파일을 최상위 폴더(guest-어쩌구저쩌구)에 놓는다.
 # 2. Ctrl+` 를 눌러 터미널을 열고, 터미널에 bash pyinit 을 친다.
-# 3. 순서대로, y 엔터 q yes 엔터 yes 를 입력한다.
+# 3. 순서대로, y 엔터 q yes 엔터 yes 를 입력한다. 이걸 생략하고 싶은데 방법좀
 
 
 while [ true ]; do
@@ -26,7 +26,7 @@ while [ true ]; do
         bash Miniconda3-latest-Linux-x86_64.sh
 
         # 설치 과정을 자동으로 진행한다.
-
+        # 위의 3.에 있는 y 엔터 q yes 엔터 yes를 자동으로 입력하는 부분이 들어갈 것이다.
 
         # VSCode CSharp extension 설치
         code --install-extension ms-python.python
