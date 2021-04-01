@@ -17,6 +17,14 @@ echo -e "{
     \"terminal.integrated.cursorStyle\": \"underline\"
 }" > ~/.config/Code/User/settings.json
 
+echo -e "[
+    {
+        \"key\": \"ctrl+enter\",
+        \"command\": \"python.execInTerminal\"
+    }
+]" > ~/.config/Code/User/keybindings.json
+
+
 #code --install-extension ms-dotnettools.csharp
 #code --install-extension ms-python.python
 code --install-extension ms-vscode.cpptools
