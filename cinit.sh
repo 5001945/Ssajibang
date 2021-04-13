@@ -3,8 +3,8 @@
 
 # 사용 방법
 #
-# 1. cinit 파일을 최상위 폴더(guest-어쩌구저쩌구)에 놓는다.
-# 2. Alt + F2를 누른 뒤 bash cinit 을 친다.
+# 1. cinit.sh 파일을 최상위 폴더(guest-어쩌구저쩌구)에 놓는다.
+# 2. Alt + F2를 누른 뒤 bash cinit.sh 을 친다.
 # 3. 새로운 창이 뜰 때까지 기다린다. (약 3분 소요)
 
 code
