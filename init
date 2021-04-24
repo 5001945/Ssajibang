@@ -1,0 +1,159 @@
+#!/bin/bash
+
+# 사용 방법
+#
+# 1. init 파일을 최상위 폴더(guest-어쩌구저쩌구)에 놓는다.
+# 2. Alt + F2를 누른 뒤 bash init 을 친다. 뒤에 옵션을 여러 개 붙일 수 있다.
+#       -p, --py, --python : 파이썬
+#       --cs, --csharp : C#
+#       -c, --c, --cpp : C/C++
+# 3. 실행하면 새로운 vscode 창이 뜬다. 새로운 창이 뜰 때까지 기다린다. (최대 3-4분 소요)
+# 4. 확실한 설치를 위해, 둘 다 닫고 vscode를 새로 실행한다.
+
+# 주의사항
+# VSCode의 settings.json 파일과 keybindings.json 파일을 덮어쓰므로, 기존 설정 파일이 날아가는 게 싫으시다면
+# 백업을 하시거나 -n 또는 --no-custom 옵션을 주어야 합니다.
+
+
+function init_custom_settings(){
+    echo -e \
+"{
+    \"editor.fontFamily\": \"'Monospace 10', 'Droid Sans Mono', monospace, 'Droid Sans Fallback'\",
+    \"editor.fontSize\": 14,
+    \"editor.fontLigatures\": true,
+    \"terminal.integrated.fontSize\": 14,
+    \"terminal.integrated.fontFamily\": \"'Droid Sans Mono', 'monospace', monospace, 'Droid Sans Fallback'\",
+    \"terminal.integrated.cursorBlinking\": true,
+    \"terminal.integrated.cursorStyle\": \"underline\"
+}
+" > ~/.config/Code/User/settings.json
+
+    echo -e \
+"[
+    {
+        \"key\": \"ctrl+enter\",
+        \"command\": \"python.execInTerminal\"
+    }
+]
+" > ~/.config/Code/User/keybindings.json
+}
+
+function init_cpp_keybindings(){
+    echo -e \
+"[
+    {
+        \"key\": \"ctrl+enter\",
+        \"command\": \"python.execInTerminal\"
+    },
+    {
+        \"key\": \"ctrl+enter\",
+        \"command\": \"extension.CompileRun\"
+    },
+    {
+        \"key\": \"ctrl+enter\",
+        \"command\": \"workbench.action.debug.pause\",
+        \"when\": \"debugState == \'running\'\"
+    }
+]
+" > ~/.config/Code/User/keybindings.json
+}
+
+function install_miniconda(){
+    # conda 명령어가 이미 있을 경우 중단한다.
+    if command -v conda &> /dev/null ; then
+        echo "Miniconda has already installed."
+        return
+    fi
+
+    # https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh 에서 미니콘다 설치 스크립트를 받는다. 이미 있으면 생략한다.
+    wget -nc https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda-install.sh
+
+    # 설치 과정을 silent mode로 자동으로 진행한다.
+    bash miniconda-install.sh -b
+    ./miniconda3/bin/conda init
+
+    # 설치가 완료되었으면 설치 스크립트는 지운다.
+    rm miniconda-install.sh
+}
+
+function install_dotnet(){
+    # dotnet 명령어가 이미 있을 경우 중단한다.
+    if command -v dotnet &> /dev/null ; then
+        echo "Dotnet has already installed."
+        return
+    fi
+
+    # https://dot.net/v1/dotnet-install.sh 에서 닷넷 설치 스크립트를 받는다. 이미 있으면 생략한다.
+    wget -nc https://dot.net/v1/dotnet-install.sh -O dotnet-install.sh
+
+    # 설치하고, 환경변수에 추가한다.
+    bash dotnet-install.sh -c Current
+    echo -e "export PATH=\"$PATH:$HOME/.dotnet\"" >> ~/.bashrc
+
+    # 설치가 완료되었으면 설치 스크립트는 지운다.
+    rm dotnet-install.sh
+}
+
+
+# 처음 vscode를 실행시켜 초기 설정 파일들을 생성한다.
+code
+
+# 이 파일의 인자 중 Python, C#, C나 C++를 가리키는 것이 있는지 검색한다.
+custom=true
+py=false
+cs=false
+cpp=false
+
+for arg in "$@" ; do
+    case $arg in 
+        "-n"|"--no-custom")
+            custom=false
+        ;;
+        "-p"|"--py"|"--python")
+            py=true
+        ;;
+        "--cs"|"--csharp"|"--dotnet")
+            cs=true
+        ;;
+        "-c"|"--c"|"--cpp")
+            cpp=true
+        ;;
+        *)
+        ;;
+    esac
+done
+
+
+# 인자에 custom을 끄는 옵션이 없으면, settings.json 파일과 keybindings.json 파일을 수정한다.
+if $custom ; then
+    init_custom_settings
+fi
+
+# 인자에 Python에 해당하는 옵션이 있으면, miniconda를 설치하고 extension을 깐다.
+if $py ; then
+    install_miniconda
+    code --install-extension ms-python.python
+fi
+
+# 인자에 C#에 해당하는 옵션이 있으면, dotnet을 설치하고 extension을 깐다.
+if $cs ; then
+    install_dotnet
+    code --install-extension ms-dotnettools.csharp
+fi
+
+# 인자에 C나 C++에 해당하는 옵션이 있으면, extension을 깔고 keybindings.json을 다시 수정한다.
+if $cpp ; then
+    code --install-extension ms-vscode.cpptools
+    code --install-extension danielpinto8zz6.c-cpp-compile-run
+    if $custom ;  then
+        # 설정 F6에서 Ctrl+Enter로 바꾸기
+        init_cpp_keybindings
+    fi
+fi
+
+# 한국어 extension을 깐다.
+code --install-extension ms-ceintl.vscode-language-pack-ko
+
+# 설치가 완료되었다는 것을 알려주기 위해 새 vscode 창을 연다.
+code
+exit 0
