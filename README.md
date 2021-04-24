@@ -11,7 +11,7 @@
 
 실행 방법
 ---
-1. init 파일에 들어가서 Raw를 눌러 raw 파일을 열고, `Ctrl+S` 를 눌러 왼쪽의 '홈'(guest로 시작하는 폴더)에 저장한다.
+1. init 파일에 들어가서 Raw를 눌러 raw 파일을 열고, `Ctrl+S` 를 눌러 왼쪽의 '홈'(guest로 시작하는 폴더)에 저장한다. 파일 이름은 확장자 없이 init으로 저장한다.
 2. `Alt+F2` 를 누른 뒤 `bash init` 을 친다. 뒤에 붙이는 옵션에 따라 설치하는 파일 및 extension이 달라진다.
 > `-n`, `--no-custom` : 설정 파일을 바꾸지 않음<br>
 > `-p`, `--py`, `--python` : 파이썬. Miniconda를 설치하고 Python extension을 깐다.<br>
