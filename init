@@ -5,15 +5,18 @@
 # 1. init 파일을 홈 폴더(guest-어쩌구저쩌구)에 놓는다.
 # 2. Alt+F2를 누른 뒤 bash init 을 친다. 뒤에 옵션을 여러 개 붙일 수 있다.
 #       -n, --no-custom : 설정 파일을 수정하지 않음
+#        --ce, --ctrl-enter : Ctrl+Enter로 실행 가능하도록 만듬
 #       -p, --py, --python : 파이썬
 #       --cs, --csharp : C#
 #       -c, --c, --cpp : C/C++
-# 3. 실행하면 새로운 vscode 창이 뜬다. 새로운 창이 뜰 때까지 기다린다. (최대 3-4분 소요)
-# 4. 확실한 설치를 위해, 둘 다 닫고 vscode를 새로 실행한다.
+#       -k, --kotlin : 코틀린
+# 3. 실행하면 새로운 VS Code 창이 뜬다. 자동으로 닫히고 새로운 창이 뜰 때까지 기다린다. (최대 3-4분 소요)
 
 # 주의사항
-# VSCode의 settings.json 파일과 keybindings.json 파일을 덮어쓰므로, 기존 설정 파일이 날아가는 게 싫으시다면
-# 백업을 하시거나 -n 또는 --no-custom 옵션을 주어야 합니다.
+#
+# 1. VS Code의 settings.json 파일과 keybindings.json 파일을 덮어쓰므로, 기존 설정 파일이 날아가는 게 싫으시다면
+#    백업을 하시거나 -n 또는 --no-custom 옵션을 주어야 합니다.
+# 2. 기존에 켜 두었던 VS Code 창은 전부 강제종료되므로, 미리 모두 저장을 한 상태에서 실행하시기 바랍니다.
 
 
 function init_custom_settings(){
@@ -25,35 +28,18 @@ function init_custom_settings(){
     \"terminal.integrated.fontSize\": 14,
     \"terminal.integrated.fontFamily\": \"'Droid Sans Mono', 'monospace', monospace, 'Droid Sans Fallback'\",
     \"terminal.integrated.cursorBlinking\": true,
-    \"terminal.integrated.cursorStyle\": \"underline\"
+    \"terminal.integrated.cursorStyle\": \"underline\",
+    \"code-runner.runInTerminal\": true
 }
 " > ~/.config/Code/User/settings.json
-
-    echo -e \
-"[
-    {
-        \"key\": \"ctrl+enter\",
-        \"command\": \"python.execInTerminal\"
-    }
-]
-" > ~/.config/Code/User/keybindings.json
 }
 
-function init_cpp_keybindings(){
+function init_ctrl_enter_keybindings(){
     echo -e \
 "[
     {
         \"key\": \"ctrl+enter\",
-        \"command\": \"python.execInTerminal\"
-    },
-    {
-        \"key\": \"ctrl+enter\",
-        \"command\": \"extension.CompileRun\"
-    },
-    {
-        \"key\": \"ctrl+enter\",
-        \"command\": \"workbench.action.debug.pause\",
-        \"when\": \"debugState == \'running\'\"
+        \"command\": \"code-runner.run\"
     }
 ]
 " > ~/.config/Code/User/keybindings.json
@@ -87,7 +73,7 @@ function install_dotnet(){
     # https://dot.net/v1/dotnet-install.sh 에서 닷넷 설치 스크립트를 받는다. 이미 있으면 생략한다.
     wget -nc https://dot.net/v1/dotnet-install.sh -O dotnet-install.sh
 
-    # 설치하고, 환경변수에 추가한다.
+    # 설치하고, ~/.dotnet 위치를 환경변수에 추가한다.
     bash dotnet-install.sh -c Current
     echo -e "export PATH=\"$PATH:$HOME/.dotnet\"" >> ~/.bashrc
 
@@ -95,29 +81,58 @@ function install_dotnet(){
     rm dotnet-install.sh
 }
 
+function install_kotlin(){
+    # kotlinc 명령어가 이미 있을 경우 중단한다.
+    if command -v kotlinc &> /dev/null ; then
+        echo "Kotlin has already installed."
+        return
+    fi
+
+    # https://github.com/JetBrains/kotlin/releases/download/v1.5.10/kotlin-compiler-1.5.10.zip 에서 코틀린 컴파일러를 받는다. 이미 있으면 생략한다.
+    wget -nc https://github.com/JetBrains/kotlin/releases/download/v1.5.10/kotlin-compiler-1.5.10.zip -O kotlin-compiler.zip
+
+    # 압축을 풀고, 나온 폴더를 숨김 폴더로 만든다.
+    unzip kotlin-compiler.zip
+    mv kotlinc .kotlinc
+
+    # ~/.kotlinc/bin 위치를 환경변수에 추가한다.
+    echo -e "export PATH=\"$PATH:$HOME/.kotlinc/bin\"" >> ~/.bashrc
+
+    # 다운받은 압축 파일은 지운다.
+    rm kotlin-compiler.zip
+}
+
 
 # 처음 vscode를 실행시켜 초기 설정 파일들을 생성한다.
 code
 
-# 이 파일의 인자 중 Python, C#, C나 C++를 가리키는 것이 있는지 검색한다.
+# 이 파일의 인자 중 Python, C#, C나 C++, Kotlin을 가리키는 것이 있는지 검색한다.
 custom=true
-py=false
-cs=false
+ctrlenter=false
+python=false
+csharp=false
 cpp=false
+kotlin=false
 
 for arg in "$@" ; do
     case $arg in 
         "-n"|"--no-custom")
             custom=false
         ;;
+        "--ce"|"--ctrl-enter")
+            ctrlenter=true
+        ;;
         "-p"|"--py"|"--python")
-            py=true
+            python=true
         ;;
         "--cs"|"--csharp"|"--dotnet")
-            cs=true
+            csharp=true
         ;;
         "-c"|"--c"|"--cpp")
             cpp=true
+        ;;
+        "-k"|"--kotlin")
+            kotlin=true
         ;;
         *)
         ;;
@@ -125,36 +140,42 @@ for arg in "$@" ; do
 done
 
 
-# 인자에 custom을 끄는 옵션이 없으면, settings.json 파일과 keybindings.json 파일을 수정한다.
+# 인자에 custom을 끄는 옵션이 없으면, settings.json 파일을 수정한다.
 if $custom ; then
     init_custom_settings
+    if $ctrlenter ; then
+        # 컴파일 및 실행 단축키를 Ctrl+Alt+N에서 Ctrl+Enter로 바꾸기
+        init_ctrl_enter_keybindings
 fi
 
 # 인자에 Python에 해당하는 옵션이 있으면, miniconda를 설치하고 extension을 깐다.
-if $py ; then
+if $python ; then
     install_miniconda
     code --install-extension ms-python.python
 fi
 
 # 인자에 C#에 해당하는 옵션이 있으면, dotnet을 설치하고 extension을 깐다.
-if $cs ; then
+if $csharp ; then
     install_dotnet
     code --install-extension ms-dotnettools.csharp
 fi
 
-# 인자에 C나 C++에 해당하는 옵션이 있으면, extension을 깔고 keybindings.json을 다시 수정한다.
+# 인자에 C나 C++에 해당하는 옵션이 있으면, extension을 깐다.
 if $cpp ; then
     code --install-extension ms-vscode.cpptools
-    code --install-extension danielpinto8zz6.c-cpp-compile-run
-    if $custom ;  then
-        # 설정 F6에서 Ctrl+Enter로 바꾸기
-        init_cpp_keybindings
-    fi
 fi
 
-# 한국어 extension을 깐다.
+# 인자에 Kotlin에 해당하는 옵션이 있으면, kotlin 컴파일러를 설치하고 extension을 깐다.
+if $kotlin ; then
+    install_kotlin
+    code --install-extension mathiasfrohlich.kotlin
+fi
+
+# code runner 및 한국어 extension을 깐다.
+code --install-extension formulahendry.code-runner
 code --install-extension ms-ceintl.vscode-language-pack-ko
 
-# 설치가 완료되었다는 것을 알려주기 위해 새 vscode 창을 연다.
+# 설치가 완료되었다는 것을 알려주기 위해 모든 vscode 창을 닫고 새 창을 연다.
+pkill -9 code
 code
 exit 0
