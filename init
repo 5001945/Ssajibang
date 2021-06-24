@@ -169,7 +169,7 @@ fi
 # 인자에 Kotlin에 해당하는 옵션이 있으면, kotlin 컴파일러를 설치하고 extension을 깐다.
 if $kotlin ; then
     install_kotlin
-    code --install-extension mathiasfrohlich.kotlin
+    code --install-extension fwcd.kotlin
 fi
 
 # code runner 및 한국어 extension을 깐다.
