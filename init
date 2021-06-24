@@ -146,6 +146,7 @@ if $custom ; then
     if $ctrlenter ; then
         # 컴파일 및 실행 단축키를 Ctrl+Alt+N에서 Ctrl+Enter로 바꾸기
         init_ctrl_enter_keybindings
+    fi
 fi
 
 # 인자에 Python에 해당하는 옵션이 있으면, miniconda를 설치하고 extension을 깐다.
